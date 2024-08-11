@@ -1,0 +1,1 @@
+This website provides an intuitive and user-friendly platform for calculating taxes quickly and accurately. Whether you’re an individual or a business, our tax calculator helps you determine your tax liabilities based on the latest tax laws and regulations.
