@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tax Calculator</title>
+    <style>
+        /* CSS styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            max-width: 500px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f7f7f7;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        /* Error icon styling */
+        .error-icon {
+            color: red;
+            margin-left: 5px;
+            display: none;
+            cursor: pointer;
+        }
+        /* Tooltip for error icons */
+        .error-icon:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 4px;
+            border-radius: 4px;
+            white-space: nowrap;
+            top: -20px;
+            left: 20px;
+        }
+        /* Modal styling */
+        #result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        #result-modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 400px;
+        }
+
+        #result-modal button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Tax Calculator</h2>
+
+        <!-- Tax Calculator Form -->
+        <form id="tax-form">
+            <!-- Gross Annual Income -->
+            <div class="form-group">
+                <label for="gross-income">Gross Annual Income:</label>
+                <input type="number" id="gross-income" name="gross-income" required />
+                <!-- Error icon for gross income -->
+                <span class="error-icon" id="gross-income-error" data-tooltip="Please enter a valid gross annual income.">!</span>
+            </div>
+
+            <!-- Extra Income -->
+            <div class="form-group">
+                <label for="extra-income">Extra Income:</label>
+                <input type="number" id="extra-income" name="extra-income" required />
+                <!-- Error icon for extra income -->
+                <span class="error-icon" id="extra-income-error" data-tooltip="Please enter a valid extra income amount.">!</span>
+            </div>
+
+            <!-- Age Group -->
+            <div class="form-group">
+                <label for="age-group">Age Group:</label>
+                <select id="age-group" name="age-group" required>
+                    <option value="">--Select an age group--</option>
+                    <option value="<40">Less than 40</option>
+                    <option value=">=40<60">40 to 59</option>
+                    <option value=">=60">60 and above</option>
+                </select>
+                <!-- Error icon for age group -->
+                <span class="error-icon" id="age-group-error" data-tooltip="Age group is mandatory.">!</span>
+            </div>
+
+            <!-- Total Applicable Deductions -->
+            <div class="form-group">
+                <label for="deductions">Total Applicable Deductions:</label>
+                <input type="number" id="deductions" name="deductions" required />
+                <!-- Error icon for deductions -->
+                <span class="error-icon" id="deductions-error" data-tooltip="Please enter a valid deduction amount.">!</span>
+            </div>
+
+            <button type="submit">Calculate Tax</button>
+        </form>
+
+        <!-- Result Modal -->
+        <div id="result-modal">
+            <div id="result-modal-content">
+                <h3>Tax Calculation Result</h3>
+                <p id="result-text"></p>
+                <button onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to calculate tax based on age group and income brackets
+        function calculateTax(overallIncome, ageGroup) {
+            let tax = 0;
+
+            // Define tax rates based on age group
+            let taxRate = 0;
+            if (ageGroup === "<40") {
+                // Tax rate for age group < 40
+                taxRate = 0.3;
+            } else if (ageGroup === ">=40<60") {
+                // Tax rate for age group >= 40 and < 60
+                taxRate = 0.4;
+            } else if (ageGroup === ">=60") {
+                // Tax rate for age group >= 60
+                taxRate = 0.1;
+            }
+
+            // Calculate tax if overall income is above ₹800,000
+            if (overallIncome > 800000) {
+                tax = (overallIncome - 800000) * taxRate;
+            }
+
+            return tax;
+        }
+
+        // JavaScript for tax calculation and error handling
+        document.getElementById("tax-form").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Get form values
+            const grossIncome = parseFloat(document.getElementById("gross-income").value);
+            const extraIncome = parseFloat(document.getElementById("extra-income").value);
+            const ageGroup = document.getElementById("age-group").value;
+            const deductions = parseFloat(document.getElementById("deductions").value);
+
+            // Variables to track errors
+            let hasError = false;
+
+            // Validate Gross Annual Income
+            if (isNaN(grossIncome) || grossIncome < 0) {
+                // Show error icon if gross income is invalid
+                document.getElementById("gross-income-error").style.display = "inline";
+                hasError = true;
+            } else {
+                // Hide error icon if gross income is valid
+                document.getElementById("gross-income-error").style.display = "none";
+            }
+
+            // Validate Extra Income
+            if (isNaN(extraIncome) || extraIncome < 0) {
+                // Show error icon if extra income is invalid
+                document.getElementById("extra-income-error").style.display = "inline";
+                hasError = true;
+            } else {
+                // Hide error icon if extra income is valid
+                document.getElementById("extra-income-error").style.display = "none";
+            }
+
+            // Validate Age Group
+            if (!ageGroup) {
+                // Show error icon if age group is not selected
+                document.getElementById("age-group-error").style.display = "inline";
+                hasError = true;
+            } else {
+                // Hide error icon if age group is selected
+                document.getElementById("age-group-error").style.display = "none";
+            }
+
+            // Validate Deductions
+            if (isNaN(deductions) || deductions < 0) {
+                // Show error icon if deductions are invalid
+                document.getElementById("deductions-error").style.display = "inline";
+                hasError = true;
+            } else {
+                // Hide error icon if deductions are valid
+                document.getElementById("deductions-error").style.display = "none";
+            }
+
+            // If there are errors, stop execution
+            if (hasError) {
+                return;
+            }
+
+            // Calculate overall income after deductions
+            const overallIncome = grossIncome + extraIncome - deductions;
+
+            // Calculate tax using the function
+            const tax = calculateTax(overallIncome, ageGroup);
+
+            // Calculate overall income after tax deductions
+            const incomeAfterTaxDeductions = overallIncome - tax;
+
+            // Display the result in the modal
+            if (overallIncome <= 800000) {
+                document.getElementById("result-text").textContent = `NO TAX. Overall income after deductions is ₹${overallIncome.toFixed(2)}`;
+            } else {
+                document.getElementById("result-text").textContent = `The calculated tax is: ₹${tax.toFixed(2)}. Overall income after deductions is ₹${incomeAfterTaxDeductions.toFixed(2)}`;
+            }
+
+            // Display the modal with the result
+            document.getElementById("result-modal").style.display = "block";
+        });
+
+        // Function to close the modal
+        function closeModal() {
+            // Hide the modal when the close button is clicked
+            document.getElementById("result-modal").style.display = "none";
+        }
+    </script>
+</body>
+
+</html>
